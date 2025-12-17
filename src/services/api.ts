@@ -28,6 +28,11 @@ class ApiService {
     return data;
   }
 
+  async getServicesHealth() {
+    const { data } = await this.client.get('/services/health');
+    return data.data;
+  }
+
   async getCurrentUser() {
     const { data } = await this.client.get('/me');
     return data.data;

@@ -6,9 +6,7 @@ import Dashboard from './components/Dashboard';
 import TokenList from './components/TokenList';
 import SecurityDashboard from './components/SecurityDashboard';
 import TrustLevelDashboard from './components/TrustLevelDashboard';
-import PortalBuilder from './components/PortalBuilder';
 import MonitoringDashboard from './components/MonitoringDashboard';
-import SettingsHub from './components/SettingsHub';
 import ApiKeyPrompt from './components/ApiKeyPrompt';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
@@ -19,8 +17,6 @@ import { DashboardSkeleton } from './components/LoadingSkeleton';
 import { CommandPalette, Command } from './components/CommandPalette';
 import { NotificationCenter } from './components/NotificationCenter';
 import { WebSocketStatus } from './components/WebSocketStatus';
-import { LiveTransactionFeed } from './components/LiveTransactionFeed';
-import { LivePriceWidget } from './components/LivePriceWidget';
 import { NotificationPreferences } from './components/NotificationPreferences';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { UserManagement } from './components/UserManagement';
@@ -28,7 +24,7 @@ import { AuditLog } from './components/AuditLog';
 import { useKeyboardShortcuts, useCommandPalette } from './hooks/useKeyboardShortcuts';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
 
-type ActiveView = 'overview' | 'security' | 'trust' | 'portal' | 'monitoring' | 'settings' | 'tokens' | 'analytics' | 'live' | 'users' | 'audit' | 'notification-settings';
+type ActiveView = 'overview' | 'security' | 'trust' | 'monitoring' | 'tokens' | 'analytics' | 'users' | 'audit' | 'notification-settings';
 
 function AppContent() {
   const { theme, toggleTheme } = useTheme();
@@ -159,28 +155,12 @@ function AppContent() {
       keywords: ['users', 'levels', 'reputation'],
     },
     {
-      id: 'portal',
-      label: 'Portal Builder',
-      icon: '🚪',
-      action: () => setActiveView('portal'),
-      category: 'Navigation',
-      keywords: ['captcha', 'verification', 'welcome'],
-    },
-    {
       id: 'monitoring',
       label: 'Monitoring',
       icon: '📊',
       action: () => setActiveView('monitoring'),
       category: 'Navigation',
       keywords: ['health', 'uptime', 'performance'],
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: '⚙️',
-      action: () => setActiveView('settings'),
-      category: 'Navigation',
-      keywords: ['config', 'configuration', 'preferences'],
     },
     {
       id: 'tokens',
@@ -197,14 +177,6 @@ function AppContent() {
       action: () => setActiveView('analytics'),
       category: 'Navigation',
       keywords: ['charts', 'trends', 'stats', 'analysis'],
-    },
-    {
-      id: 'live',
-      label: 'Live Feed',
-      icon: '🔴',
-      action: () => setActiveView('live'),
-      category: 'Navigation',
-      keywords: ['real-time', 'transactions', 'prices', 'stream'],
     },
     {
       id: 'users',
@@ -353,16 +325,6 @@ function AppContent() {
               📈 Analytics
             </button>
             <button
-              onClick={() => setActiveView('live')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeView === 'live'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              🔴 Live
-            </button>
-            <button
               onClick={() => setActiveView('security')}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeView === 'security'
@@ -381,16 +343,6 @@ function AppContent() {
               }`}
             >
               ⭐ Trust Levels
-            </button>
-            <button
-              onClick={() => setActiveView('portal')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeView === 'portal'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              🚪 Portal Builder
             </button>
             <button
               onClick={() => setActiveView('users')}
@@ -423,16 +375,6 @@ function AppContent() {
               📊 Monitoring
             </button>
             <button
-              onClick={() => setActiveView('settings')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeView === 'settings'
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              ⚙️ Settings
-            </button>
-            <button
               onClick={() => setActiveView('tokens')}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeView === 'tokens'
@@ -458,26 +400,15 @@ function AppContent() {
 
           {activeView === 'analytics' && <AnalyticsDashboard />}
 
-          {activeView === 'live' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <LiveTransactionFeed />
-              <LivePriceWidget />
-            </div>
-          )}
-
           {activeView === 'security' && <SecurityDashboard />}
 
           {activeView === 'trust' && <TrustLevelDashboard />}
-
-          {activeView === 'portal' && <PortalBuilder />}
 
           {activeView === 'users' && <UserManagement />}
 
           {activeView === 'audit' && <AuditLog />}
 
           {activeView === 'monitoring' && <MonitoringDashboard />}
-
-          {activeView === 'settings' && <SettingsHub />}
 
           {activeView === 'notification-settings' && <NotificationPreferences />}
 

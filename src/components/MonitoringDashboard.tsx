@@ -17,6 +17,7 @@ interface ServiceStatus {
 
 export default function MonitoringDashboard() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [services, setServices] = useState<ServiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [uptimeData, setUptimeData] = useState<any[]>([]);
   const [refreshInterval, setRefreshInterval] = useState<number>(30000); // 30 seconds
@@ -30,8 +31,13 @@ export default function MonitoringDashboard() {
   const fetchHealth = async () => {
     try {
       setLoading(true);
-      const data = await api.getHealth();
-      setHealth(data);
+      const [healthData, servicesData] = await Promise.all([
+        api.getHealth(),
+        api.getServicesHealth(),
+      ]);
+
+      setHealth(healthData);
+      setServices(servicesData || []);
 
       // Update uptime data for chart
       setUptimeData((prev) => {
@@ -39,7 +45,7 @@ export default function MonitoringDashboard() {
           ...prev,
           {
             time: new Date().toLocaleTimeString(),
-            uptime: Math.floor(data.uptime / 60), // Convert to minutes
+            uptime: Math.floor(healthData.uptime / 60), // Convert to minutes
           },
         ].slice(-20); // Keep last 20 data points
         return newData;
@@ -50,15 +56,6 @@ export default function MonitoringDashboard() {
       setLoading(false);
     }
   };
-
-  // Mock service statuses (these would come from API in production)
-  const services: ServiceStatus[] = [
-    { name: 'API Server', status: 'healthy', responseTime: 45, lastCheck: new Date().toISOString() },
-    { name: 'Database', status: 'healthy', responseTime: 12, lastCheck: new Date().toISOString() },
-    { name: 'Redis Cache', status: 'healthy', responseTime: 8, lastCheck: new Date().toISOString() },
-    { name: 'Telegram Bot', status: 'healthy', responseTime: 120, lastCheck: new Date().toISOString() },
-    { name: 'Blockchain Monitor', status: 'healthy', responseTime: 250, lastCheck: new Date().toISOString() },
-  ];
 
   const formatUptime = (seconds: number) => {
     const days = Math.floor(seconds / 86400);
