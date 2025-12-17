@@ -67,8 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAuthenticated = user !== null;
 
-  const login = useCallback(async (apiKey: string) => {
-    // API key is already set on the api client upstream; fetch current user profile
+  const login = useCallback(async (_apiKey?: string) => {
+    // Note: api.login() should be called BEFORE this function
+    // This function just fetches the user profile with the session token
+
+    // Fetch current user profile with the session token
     const profile = await api.getCurrentUser();
     const role = (profile?.role as UserRole) || 'viewer';
     const permissions: Permission[] = profile?.permissions?.length
@@ -91,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setUser(null);
+    api.clearSession();
     localStorage.removeItem('pulse_buy_bot_api_key');
   }, []);
 

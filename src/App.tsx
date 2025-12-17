@@ -35,25 +35,52 @@ function AppContent() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
-    // Check if API key is stored
-    const storedKey = localStorage.getItem('pulse_buy_bot_api_key');
-    if (storedKey) {
-      api.setApiKey(storedKey);
-      verifyApiKey(storedKey);
+    // Check if we have a saved session or API key
+    const storedSessionToken = localStorage.getItem('pulse_buy_bot_session_token');
+    const storedApiKey = localStorage.getItem('pulse_buy_bot_api_key');
+
+    if (storedSessionToken) {
+      // Try to use existing session token
+      verifySession();
+    } else if (storedApiKey) {
+      // Login with stored API key to get new session
+      verifyApiKey(storedApiKey);
     } else {
       setLoading(false);
     }
   }, []);
 
-  const verifyApiKey = async (_key: string) => {
+  const verifySession = async () => {
     try {
-      await api.getHealth();
-      await authLogin(_key);
+      // Session token is already loaded in api constructor
+      await authLogin(''); // Empty string since we're using session token
+      setIsAuthenticated(true);
+      setLoading(false);
+    } catch (error) {
+      console.error('Invalid session, need to login:', error);
+      // Session expired, check if we have API key to re-login
+      const storedApiKey = localStorage.getItem('pulse_buy_bot_api_key');
+      if (storedApiKey) {
+        verifyApiKey(storedApiKey);
+      } else {
+        api.clearSession();
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    }
+  };
+
+  const verifyApiKey = async (apiKey: string) => {
+    try {
+      // Login with API key to get session token
+      await api.login(apiKey);
+      await authLogin(apiKey);
       setIsAuthenticated(true);
       setLoading(false);
     } catch (error) {
       console.error('Invalid API key:', error);
       localStorage.removeItem('pulse_buy_bot_api_key');
+      api.clearSession();
       setIsAuthenticated(false);
       setLoading(false);
     }
@@ -61,16 +88,16 @@ function AppContent() {
 
   const handleApiKeySubmit = async (key: string) => {
     setLoading(true);
-    api.setApiKey(key);
 
     try {
-      await api.getHealth();
+      // Login with API key to get session token
+      await api.login(key);
       await authLogin(key);
-      // Attempt to fetch user profile; if it fails, still block auth to avoid mock data
       localStorage.setItem('pulse_buy_bot_api_key', key);
       setIsAuthenticated(true);
     } catch (error) {
       alert('Invalid API key or unable to fetch user profile. Please try again.');
+      api.clearSession();
       setIsAuthenticated(false);
     } finally {
       setLoading(false);

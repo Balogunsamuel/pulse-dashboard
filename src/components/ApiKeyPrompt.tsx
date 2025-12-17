@@ -48,11 +48,6 @@ export default function ApiKeyPrompt({ onSubmit }: ApiKeyPromptProps) {
             Access Dashboard
           </button>
         </form>
-
-        <div className="mt-4 text-xs text-gray-500 text-center">
-          <p>API key is stored locally in your browser</p>
-          <p className="mt-1">Set ADMIN_API_KEY in your .env file</p>
-        </div>
       </div>
     </div>
   );

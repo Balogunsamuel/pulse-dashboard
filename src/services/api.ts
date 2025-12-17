@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 class ApiService {
   private client: AxiosInstance;
-  private apiKey: string = '';
+  private sessionToken: string = '';
 
   constructor() {
     this.client = axios.create({
@@ -10,17 +10,43 @@ class ApiService {
       timeout: 10000,
     });
 
-    // Add API key to all requests
+    // Add session token to all requests
     this.client.interceptors.request.use((config) => {
-      if (this.apiKey) {
-        config.headers['X-API-Key'] = this.apiKey;
+      if (this.sessionToken) {
+        config.headers['Authorization'] = `Bearer ${this.sessionToken}`;
       }
       return config;
     });
+
+    // Load saved session token from localStorage
+    const savedToken = localStorage.getItem('pulse_buy_bot_session_token');
+    if (savedToken) {
+      this.sessionToken = savedToken;
+    }
+  }
+
+  async login(apiKey: string) {
+    const { data } = await this.client.post('/auth/login', { apiKey });
+    if (data.success && data.data.sessionToken) {
+      this.sessionToken = data.data.sessionToken;
+      localStorage.setItem('pulse_buy_bot_session_token', this.sessionToken);
+    }
+    return data;
   }
 
   setApiKey(key: string) {
-    this.apiKey = key;
+    // Keep for backward compatibility but use login instead
+    this.sessionToken = key;
+  }
+
+  setSessionToken(token: string) {
+    this.sessionToken = token;
+    localStorage.setItem('pulse_buy_bot_session_token', token);
+  }
+
+  clearSession() {
+    this.sessionToken = '';
+    localStorage.removeItem('pulse_buy_bot_session_token');
   }
 
   async getHealth() {
